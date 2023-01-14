@@ -15,3 +15,5 @@ There are some extras that are not included in the picture above:
 - The "Recent" and "Favorites" tabs could additionally contain links to websites (their icons) that open that website in the browser when clicked. They could also contain files, that when clicked open them.
 - If the above is implemented it would also make sense to add program/file names below their icons, to differentiate files of the same type.
 
+This won't be possible through Rainmeter, because it bumps up my CPU usage to 20% and has like 2fps when scrolling.
+
