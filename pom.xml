@@ -13,7 +13,7 @@
     <description>A creative but also precise description.</description>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.class>com.osiris.betterdesktop.Main</main.class>
     </properties>
@@ -22,6 +22,10 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>spinyowl</id>
+            <url>https://raw.github.com/SpinyOwl/repo/releases</url>
         </repository>
     </repositories>
 
@@ -36,7 +40,7 @@
         <dependency>
             <groupId>com.github.Osiris-Team</groupId>
             <artifactId>jlib</artifactId>
-            <version>16.10</version>
+            <version>16.11</version>
         </dependency>
         <dependency>
             <groupId>com.github.vatbub</groupId>
@@ -47,6 +51,12 @@
             <groupId>com.github.Osiris-Team</groupId>
             <artifactId>Better-Layout</artifactId>
             <version>1.4.0</version>
+        </dependency>
+        <!-- LEGUI - https://github.com/SpinyOwl/legui -->
+        <dependency>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-app</artifactId>
+            <version>1.86.6</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

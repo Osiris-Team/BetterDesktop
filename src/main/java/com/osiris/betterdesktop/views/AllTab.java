@@ -1,131 +1,131 @@
 package com.osiris.betterdesktop.views;
 
+import com.osiris.betterdesktop.MyFile;
+import com.osiris.betterdesktop.UI;
 import com.osiris.betterdesktop.data.Data;
-import com.osiris.betterdesktop.utils.AsyncTerminal;
-import com.osiris.betterlayout.BLayout;
-import com.osiris.betterlayout.utils.UI;
-import mslinks.ShellLink;
-
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.osiris.betterdesktop.utils.Arr;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImString;
+import org.jline.utils.Levenshtein;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class AllTab extends BLayout {
+import static imgui.ImGui.*;
 
-    public AllTab() {
-        init();
-    }
+public class AllTab {
 
-    public AllTab(Container parent) {
-        super(parent);
-        init();
-    }
-
-    public AllTab(Container parent, boolean isCropToContent) {
-        super(parent, isCropToContent);
-        init();
-    }
-
-    public AllTab(Container parent, int widthPercent, int heightPercent) {
-        super(parent, widthPercent, heightPercent);
-        init();
-    }
-
-    public void init(){
-        try{
-            new Thread(() -> {
-                HashSet<File> programs = Data.all().list;
-                int numberOfRows = (int) Math.ceil(programs.size() / 4.0); // calculate number of rows required to display all the programs
-                System.out.println(numberOfRows+"x"+4);
-                int i = 1;
-                for (File program : programs) {
-                    ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);
-                    //Image image = icon.getImage(); // get the image from the icon
-                    //Image newImage = image.getScaledInstance(64, 64, Image.SCALE_SMOOTH); // scale the image to 64x64 pixels
-                    //icon = new ImageIcon(newImage); // create a new icon from the scaled image
-                    JLabel jLabelIcon = new JLabel(icon);
-                    MouseListener mouseAdapter = new MouseListener() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            try{
-                                ShellLink link = new ShellLink(program);
-                                String exe = link.resolveTarget();
-                                if(Objects.equals(exe, "<unknown>")){
-                                    System.out.println("start \"\" \""+program+"\"");
-                                    new AsyncTerminal(
-                                            new File(System.getProperty("user.dir")),
-                                            newLine -> {},
-                                            System.err::println,
-                                            "start \""+program+"\"" // This command closes the parent terminal
-                                    );
-                                    //Runtime.getRuntime().exec();
-                                }
-                                else{
-                                    System.out.println(program+" -> "+exe);
-                                    new ProcessBuilder().command(exe).start();
-                                }
-                            } catch (Exception exception) {
-                                exception.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void mousePressed(MouseEvent e) {
-
-                        }
-
-                        @Override
-                        public void mouseReleased(MouseEvent e) {
-
-                        }
-
-                        @Override
-                        public void mouseEntered(MouseEvent e) {
-
-                        }
-
-                        @Override
-                        public void mouseExited(MouseEvent e) {
-
-                        }
-                    };
-                    jLabelIcon.addMouseListener(mouseAdapter);
-                    addV(jLabelIcon);
-                    JLabel jLabelText = new JLabel(program.getName().replace(".lnk", ""));
-                    jLabelText.addMouseListener(mouseAdapter);
-                    addH(jLabelText);
-                    i++;
-                    //add(new JLabel(program.getName()));
+    public static CopyOnWriteArrayList<MyFile> list = new CopyOnWriteArrayList<>();
+    public static CopyOnWriteArrayList<MyFile> listToDisplay = list;
+    public static AtomicLong countIconsLoaded = new AtomicLong();
+    static ImString inputValue = new ImString("", 100);
+    static Map<String, CopyOnWriteArrayList<MyFile>> inputAndResult = new HashMap<>() {
+        @Override
+        public CopyOnWriteArrayList<MyFile> put(String key, CopyOnWriteArrayList<MyFile> value) {
+            if (keySet().size() > 10) // Map has now size limit of 10
+                for (Entry<String, CopyOnWriteArrayList<MyFile>> entry : this.entrySet()) {
+                    remove(entry.getKey()); // Remove first entry we get
+                    break;
                 }
-                makeScrollable();
-                UI.refresh(this);
-                UI.revalidateAllUp(this);
-                System.out.println(programs.size());
-            }).start();
-        } catch (Throwable e) {
-            e.printStackTrace();
+            return super.put(key, value);
         }
+    };
+
+    static {
+        new Thread(() -> {
+            HashSet<File> programs = Data.all().programs;
+            while (Data.isLoadingPrograms.get())
+                Thread.yield();
+            List<MyFile> finalList = new ArrayList<>();
+            for (File program : programs) {
+                ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);
+                finalList.add(new MyFile(icon, program));
+                countIconsLoaded.incrementAndGet();
+            }
+            finalList.sort(Comparator.comparing(o -> o.name)); // Sort alphabetically by name
+            list.addAll(finalList);
+            System.out.println("Loaded 'all' " + list.size() + " files.");
+        }).start();
     }
 
-    public List<Icon> getIcons(List<File> programs){
+    public AllTab(float x, float y, float width, float height) {
+        begin("all", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
+                | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
+        setWindowPos(x, y);
+        setWindowSize(width, height);
+        inputText("Search in all", inputValue);
+        beginChild("all-list");
+        //setWindowPos(x, y + 10);
+        //setWindowSize(width, height - 10);
+        if (list.isEmpty()) {
+            if (Data.isLoadingPrograms.get()) {
+                text("Loading data. This might take a while...");
+                text("Programs found: " + Data.countFound.get());
+            } else {
+                text("Loading data. This might take a while...");
+                text("Icons loaded: " + countIconsLoaded.get() + "/" + Data.countFound.get());
+            }
+        } else {
+            String input = inputValue.get();
+            if (!input.isEmpty()) {
+                CopyOnWriteArrayList<MyFile> myFiles = inputAndResult.get(input);
+                if (myFiles == null) {
+                    myFiles = new CopyOnWriteArrayList<>();
+                    for (MyFile p : list) {
+                        int levDistance = Levenshtein.distance(input, p.name);
+                        int maxLength = Math.max(input.length(), p.name.length());
+                        float similarity = (1 - (float) levDistance / maxLength) * 100;
+                        if (p.name.toLowerCase().startsWith(input.toLowerCase()))
+                            similarity += 100; // Give a 100% boost if it starts the same
+                        if (similarity > 30) {
+                            p.similariy = similarity;
+                            myFiles.add(p);
+                        }
+                    }
+                    myFiles.sort(Comparator.comparing(o -> o.similariy));
+                    Arr.flip(myFiles);
+                    inputAndResult.put(input, myFiles);
+                }
+                listToDisplay = myFiles;
+            } else
+                listToDisplay = list;
+        }
+        for (MyFile p : listToDisplay) {
+            if (p.iconTexture == -1) {
+                p.iconTexture = UI.toTexture(p.icon);
+            }
+            sameLine();
+            if (imageButton(p.iconTexture, 16, 16))
+                p.start.run();
+            sameLine(0, 10); // move the next item 10 pixels to the right
+            if (selectable(p.name))
+                p.start.run();
+            newLine();
+
+            if (beginPopup("Error!")) {
+                if (p.exception == null) {
+                    text("Something went wrong!");
+                    text("Check the logs for further information.");
+                } else {
+                    text("" + p.exception);
+                    StackTraceElement[] stack = p.exception.getStackTrace();
+                    for (StackTraceElement el : stack) {
+                        text(el.toString());
+                    }
+                }
+                endPopup();
+            }
+
+        }
+        endChild();
+        end();
+    }
+
+    public List<Icon> getIcons(List<File> programs) {
         List<Icon> list = new ArrayList<>();
         for (File file : programs) {
             list.add(FileSystemView.getFileSystemView().getSystemIcon(file));
@@ -133,3 +133,4 @@ public class AllTab extends BLayout {
         return list;
     }
 }
+
