@@ -102,28 +102,26 @@ public class FavoritesTab {
             text("Moved files: " + Data.countMovedFiles.get());
         }
         lock.lock();
-        for (int i = listToDisplay.size() - 1; i >= 0; i--) {
-            MyFile p = listToDisplay.get(i);
-            if (p.iconTexture == -1) {
-                p.iconTexture = UI.toTexture(p.icon);
+        for (MyFile f : listToDisplay) {
+            if (f.iconTexture == -1) {
+                f.iconTexture = UI.toTexture(f.icon);
             }
             sameLine();
-            if (imageButton(p.iconTexture, 16, 16))
-                p.start.run();
+            if (imageButton(f.iconTexture, 16, 16))
+                f.start.run();
             sameLine(0, 10); // move the next item 10 pixels to the right
-            if (selectable(p.name))
-                p.start.run();
+            if (selectable(f.name))
+                f.start.run();
             newLine();
 
             if (beginPopup("Error!")) {
-                text(p.exception.toString());
-                StackTraceElement[] stack = p.exception.getStackTrace();
+                text(f.exception.toString());
+                StackTraceElement[] stack = f.exception.getStackTrace();
                 for (StackTraceElement el : stack) {
                     text(el.toString());
                 }
                 endPopup();
             }
-
         }
         lock.unlock();
         endChild();
