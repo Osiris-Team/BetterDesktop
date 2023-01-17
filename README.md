@@ -17,3 +17,14 @@ There are some extras that are not included in the picture above:
 
 This won't be possible through Rainmeter, because it bumps up my CPU usage to 20% and has like 2fps when scrolling.
 
+Development build currently looks like this:
+![image](https://user-images.githubusercontent.com/59899645/212994843-039dd25f-458e-4ef6-a03d-41378968f582.png)
+
+- `/User/Desktop` and `/Public/Desktop` contents will be moved into the BetterDesktop program directory
+and added to the favorites tab, thus clearing up the background.
+- `/Program Files` and `/Program Files (x86)` and `/Start Menu/Programs` 
+on all drives will be scanned for .exe and .lnk files, and then added to the all tab.
+
+
+
+
