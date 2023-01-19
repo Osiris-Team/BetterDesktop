@@ -48,7 +48,7 @@ public class AllTab {
             }
             finalList.sort(Comparator.comparing(o -> o.name)); // Sort alphabetically by name
             list.addAll(finalList);
-            System.out.println("Loaded 'all' " + list.size() + " files.");
+            //System.out.println("Loaded 'all' " + list.size() + " files.");
         }).start();
     }
 
@@ -94,25 +94,58 @@ public class AllTab {
             } else
                 listToDisplay = list;
         }
-        for (MyFile p : listToDisplay) {
-            if (p.iconTexture == -1) {
-                p.iconTexture = UI.toTexture(p.icon);
+        for (MyFile f : listToDisplay) {
+            if (f.iconTexture == -1) {
+                f.iconTexture = UI.toTexture(f.icon);
             }
             sameLine();
-            if (imageButton(p.iconTexture, 16, 16))
-                p.start.run();
+            if (imageButton(f.iconTexture, 16, 16))
+                f.start.run();
             sameLine(0, 10); // move the next item 10 pixels to the right
-            if (selectable(p.name))
-                p.start.run();
+            if (selectable(f.name))
+                f.start.run();
             newLine();
 
             if (beginPopup("Error!")) {
-                if (p.exception == null) {
+                text(f.exception.toString());
+                StackTraceElement[] stack = f.exception.getStackTrace();
+                for (StackTraceElement el : stack) {
+                    text(el.toString());
+                }
+                endPopup();
+            }
+        }
+        /*
+        // Working grid view:
+        // Problem is that icons are very low quality and
+        // app/file names cannot be shown completely
+        int countIconsInLine = 10;
+        float iconWidth = width / countIconsInLine;
+        beginTable(this.toString(), countIconsInLine);
+        tableNextRow();
+        int a = 0;
+        for (MyFile f : listToDisplay) {
+            if(a == countIconsInLine) {
+                a = 0;
+                tableNextRow();
+            }
+            tableNextColumn();
+            if (f.iconTexture == -1) {
+                f.iconTexture = UI.toTexture(f.icon);
+            }
+            if (imageButton(f.iconTexture, iconWidth - 10, iconWidth - 10))
+                f.start.run();
+
+            if (selectable(f.name))
+                f.start.run();
+
+            if (beginPopup("Error!")) {
+                if (f.exception == null) {
                     text("Something went wrong!");
                     text("Check the logs for further information.");
                 } else {
-                    text("" + p.exception);
-                    StackTraceElement[] stack = p.exception.getStackTrace();
+                    text("" + f.exception);
+                    StackTraceElement[] stack = f.exception.getStackTrace();
                     for (StackTraceElement el : stack) {
                         text(el.toString());
                     }
@@ -120,7 +153,11 @@ public class AllTab {
                 endPopup();
             }
 
+            a++;
         }
+        endTable();
+         */
+
         endChild();
         end();
     }

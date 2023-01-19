@@ -56,7 +56,7 @@ public class FavoritesTab {
                         list.add(temp.myFile);
                     }
                     lock.unlock();
-                    System.out.println("Loaded 'favorites' files.");
+                    //System.out.println("Loaded 'favorites' files.");
                     Thread.sleep(3000); // 3sec
                 }
             } catch (Exception e) {
@@ -71,6 +71,7 @@ public class FavoritesTab {
                 | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
         setWindowPos(x, y);
         setWindowSize(width, height);
+
         inputText("Search in favorites", inputValue);
         beginChild("favorites-list");
         String input = inputValue.get();

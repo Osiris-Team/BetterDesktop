@@ -1,6 +1,7 @@
 package com.osiris.betterdesktop;
 
 
+import com.osiris.betterdesktop.utils.NoExRunnable;
 import com.osiris.betterdesktop.utils.jna.WindowUtils;
 import imgui.ImGui;
 import imgui.app.Color;
@@ -33,12 +34,6 @@ public class NativeWindow2 {
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     public CopyOnWriteArrayList<Runnable> onRender = new CopyOnWriteArrayList<>();
     /**
-     * By dividing 1000 milliseconds through 60, we get the millis for 1 iteration. <br>
-     * The default is 60 iterations per second. <br>
-     */
-    public int sleepMsRender = 1000 / 60;
-
-    /**
      * TODO update when changed.
      */
     public int width;
@@ -54,13 +49,13 @@ public class NativeWindow2 {
      * Background color of the window. Default transparent.
      */
     protected Color colorBg = new Color(0, 0, 0, 0);
+    private NoExRunnable sleepRunnable = () -> {
+    };
     private String glslVersion = null;
-
     public NativeWindow2(String title) {
         Rectangle screen = getScreenSize();
         init(screen.width, screen.height, title, false);
     }
-
     public NativeWindow2(int width, int height, String title) {
         init(width, height, title, false);
     }
@@ -98,13 +93,33 @@ public class NativeWindow2 {
     }
 
     /**
+     * By dividing 1000 milliseconds through 60, we get the millis for 1 iteration. <br>
+     * The default is 60 iterations per second. <br>
+     */
+    public NativeWindow2 fpsLimit(int fps) {
+        int sleepMsRender = 1000 / fps;
+        sleepRunnable = () -> {
+            Thread.sleep(sleepMsRender);
+        };
+        return this;
+    }
+
+    public NativeWindow2 fpsNoLimit() {
+        sleepRunnable = () -> {
+        };
+        return this;
+    }
+
+    /**
      * Method to initialize application.
+     * Starts with default 60 fps limit.
      *
      * @param config configuration object with basic window information
      */
     protected void init(int width, int height, String title, boolean isFullScreen) {
         this.width = width;
         this.height = height;
+        fpsLimit(60);
         AtomicBoolean isInit = new AtomicBoolean(false);
         new Thread(() -> {
             initWindow(width, height, title, isFullScreen);
@@ -226,7 +241,7 @@ public class NativeWindow2 {
         try {
             while (!GLFW.glfwWindowShouldClose(window)) {
                 runFrame();
-                Thread.sleep(sleepMsRender);
+                sleepRunnable.run();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

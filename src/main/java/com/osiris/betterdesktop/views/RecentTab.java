@@ -51,7 +51,7 @@ public class RecentTab {
                     RecentTab.list.clear();
                     RecentTab.list.addAll(list);
                     lock.unlock();
-                    System.out.println("Loaded 'recent' files.");
+                    //System.out.println("Loaded 'recent' files.");
                     Thread.sleep(3000); // 3sec
                 }
             } catch (Exception e) {
