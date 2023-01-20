@@ -22,6 +22,8 @@ to remove all its data delete the whole folder (note that your original desktop 
 
 ## Todo
 - Right-clicking could be harder to implement, so let's skip that for now, but it should do something similar to the regular right-click, or just open its location in the file explorer.
+- Add support for Linux (Mac, Ubuntu, ...).
+- Add a listener to the original desktop folder to also move files added to it later, to the favorites tab.
 
 ## Features
 - `/User/Desktop` and `/Public/Desktop` contents will be moved into the BetterDesktop program directory
