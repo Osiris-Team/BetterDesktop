@@ -49,7 +49,7 @@ public class UtilsNative {
     public boolean isRegistered(String serviceName) {
         try {
             if (OSUtils.IS_WINDOWS) {
-                Process p = new ProcessBuilder().command("REG",
+                Process p = new ProcessBuilder().command("REG", // TODO check if this actually works
                         "GET", "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
                         "/V", serviceName, "/F").start();
                 while (p.isAlive()) Thread.sleep(100);

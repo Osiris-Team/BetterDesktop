@@ -1,6 +1,16 @@
 # BetterDesktop
 A better desktop layout for fast app access.
 
+## Installation
+1. Make sure you have Java 8 or higher installed
+2. Download the [BetterDesktop.jar](https://github.com/Osiris-Team/BetterDesktop/tree/target/BetterDesktop.jar)
+and put it in a folder of your choice.
+3. Double click the .jar file.
+
+<small>To uninstall just delete the jar, 
+to remove all its data delete the whole folder (note that your original desktop is saved there).</small>
+
+
 ## Todo
 ![example_layout](https://user-images.githubusercontent.com/59899645/212469912-bd92e675-2a63-47b9-b63c-46cbbadf7b7c.png)
 - The "All" tab contains a scrollable list of all installed programs, sorted alphabetically.
@@ -24,7 +34,6 @@ Development build currently looks like this:
 and added to the favorites tab, thus clearing up the background.
 - `/Program Files` and `/Program Files (x86)` and `/Start Menu/Programs` 
 on all drives will be scanned for .exe and .lnk files, and then added to the all tab.
-
 
 
 

@@ -32,6 +32,7 @@ public class NativeWindow2 {
 
     private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    public CopyOnWriteArrayList<Runnable> onClose = new CopyOnWriteArrayList<>();
     public CopyOnWriteArrayList<Runnable> onRender = new CopyOnWriteArrayList<>();
     /**
      * TODO update when changed.
@@ -242,6 +243,9 @@ public class NativeWindow2 {
             while (!GLFW.glfwWindowShouldClose(window)) {
                 runFrame();
                 sleepRunnable.run();
+            }
+            for (Runnable runnable : onClose) {
+                runnable.run();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

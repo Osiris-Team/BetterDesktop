@@ -1,5 +1,6 @@
 package com.osiris.betterdesktop;
 
+import com.osiris.betterdesktop.data.Data;
 import com.osiris.betterdesktop.utils.UtilsNative;
 import com.osiris.betterdesktop.views.AllTab;
 import com.osiris.betterdesktop.views.FavoritesTab;
@@ -27,6 +28,7 @@ public class Main {
             }
             NativeWindow2 win = new NativeWindow2("BetterDesktop");
             win.decorate(false).showIcon(false);
+            win.onClose.add(() -> System.exit(0));
             win.onRender.add(() -> {
                 // Main
                 begin("Main Layout", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
@@ -48,6 +50,8 @@ public class Main {
                 // until there aren't any new icons being loaded, to be able
                 // to load all those icons faster.
                 win.fpsNoLimit();
+                Thread.sleep(10000);
+                while(Data.isLoadingPrograms.get()) Thread.sleep(1000);
                 long oldCount = 0;
                 long newCount = 1;
                 while (oldCount != newCount) {

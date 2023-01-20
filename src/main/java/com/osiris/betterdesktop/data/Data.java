@@ -81,8 +81,12 @@ public class Data {
 
     public static void all_refresh() {
         all_refresh_async();
-        while (isLoadingPrograms.get())
-            Thread.yield();
+        try{
+            while (isLoadingPrograms.get())
+                Thread.sleep(100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void all_refresh_async() {

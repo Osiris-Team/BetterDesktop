@@ -37,18 +37,22 @@ public class AllTab {
 
     static {
         new Thread(() -> {
-            HashSet<File> programs = Data.all().programs;
-            while (Data.isLoadingPrograms.get())
-                Thread.yield();
-            List<MyFile> finalList = new ArrayList<>();
-            for (File program : programs) {
-                ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);
-                finalList.add(new MyFile(icon, program));
-                countIconsLoaded.incrementAndGet();
+            try{
+                HashSet<File> programs = Data.all().programs;
+                while (Data.isLoadingPrograms.get())
+                    Thread.sleep(100);
+                List<MyFile> finalList = new ArrayList<>();
+                for (File program : programs) {
+                    ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);
+                    finalList.add(new MyFile(icon, program));
+                    countIconsLoaded.incrementAndGet();
+                }
+                finalList.sort(Comparator.comparing(o -> o.name)); // Sort alphabetically by name
+                list.addAll(finalList);
+                //System.out.println("Loaded 'all' " + list.size() + " files.");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            finalList.sort(Comparator.comparing(o -> o.name)); // Sort alphabetically by name
-            list.addAll(finalList);
-            //System.out.println("Loaded 'all' " + list.size() + " files.");
         }).start();
     }
 
