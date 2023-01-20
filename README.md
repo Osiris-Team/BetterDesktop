@@ -2,7 +2,7 @@
 A better desktop layout for fast app access.
 
 ## Installation
-1. Make sure you have Java 8 or higher installed
+1. Make sure you have Java 11 or higher installed
 2. Download the [BetterDesktop.jar](https://github.com/Osiris-Team/BetterDesktop/tree/target/BetterDesktop.jar)
 and put it in a folder of your choice.
 3. Double click the .jar file.
