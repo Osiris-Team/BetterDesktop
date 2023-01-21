@@ -24,7 +24,7 @@ to remove all its data delete the whole folder (note that your original desktop 
 - Right-clicking could be harder to implement, so let's skip that for now, but it should do something similar to the regular right-click, or just open its location in the file explorer.
 - Add support for Linux (Mac, Ubuntu, ...).
 - Add a listener to the original desktop folder to also move files added to it later, to the favorites tab.
-- Decrease CPU and MEM usage by making the enhancing all tab.
+- Decrease CPU and MEM usage by enhancing the all tab.
 - Add a settings popup.
 
 ## Features
