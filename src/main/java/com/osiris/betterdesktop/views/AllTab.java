@@ -39,8 +39,6 @@ public class AllTab {
         new Thread(() -> {
             try{
                 HashSet<File> programs = Data.all().programs;
-                while (Data.isLoadingPrograms.get())
-                    Thread.sleep(100);
                 List<MyFile> finalList = new ArrayList<>();
                 for (File program : programs) {
                     ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);

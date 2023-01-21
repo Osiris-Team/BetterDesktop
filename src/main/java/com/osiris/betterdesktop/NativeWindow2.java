@@ -368,4 +368,19 @@ public class NativeWindow2 {
         WindowUtils.hideTaskbarIcon(window);
         return this;
     }
+
+    /**
+     * Executes the provided code one time in the render thread/loop.
+     * If you want to run it in each render add your runnable to the {@link #onRender} list.
+     */
+    public NativeWindow2 access(Runnable runnable){
+        onRender.add(new Runnable() {
+            @Override
+            public void run() {
+                onRender.remove(this);
+                runnable.run();
+            }
+        });
+        return this;
+    }
 }

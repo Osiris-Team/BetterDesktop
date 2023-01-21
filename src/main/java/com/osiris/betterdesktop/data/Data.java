@@ -71,6 +71,8 @@ public class Data {
             all.load();
             if (all.programs.isEmpty())
                 all_refresh();
+            all = new DataAll();
+            all.load();
             if (countFound.get() == 0)
                 countFound.set(all.programs.size());
             return all;
