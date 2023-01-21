@@ -7,8 +7,11 @@ import com.osiris.betterdesktop.views.AllTab;
 import com.osiris.betterdesktop.views.FavoritesTab;
 import com.osiris.betterdesktop.views.RecentTab;
 import com.osiris.jlib.Stream;
+import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import org.lwjgl.glfw.GLFW;
 
+import java.awt.event.KeyEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +32,7 @@ public class Main {
                 e.printStackTrace();
             }
             NativeWindow2 win = new NativeWindow2("BetterDesktop");
-            win.decorate(false).showIcon(false).focus(false);
+            win.decorate(false).showIcon(false);
             win.onClose.add(() -> System.exit(0));
             win.onRender.add(() -> {
                 // Main
@@ -54,6 +57,9 @@ public class Main {
                     oldSleepRunnable.set(win.sleepRunnable);
                     win.fpsLimit(1);
                 }
+            });
+            win.onKeysPressedGlobal(new int[]{KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_D}, () -> {
+                win.focus();
             });
             try {
                 // Because loading of icons needs to be done

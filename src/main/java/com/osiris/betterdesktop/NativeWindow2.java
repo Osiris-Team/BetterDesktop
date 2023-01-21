@@ -3,6 +3,7 @@ package com.osiris.betterdesktop;
 
 import com.osiris.betterdesktop.utils.NoExRunnable;
 import com.osiris.betterdesktop.utils.jna.WindowUtils;
+import com.sun.jna.platform.KeyboardUtils;
 import imgui.ImGui;
 import imgui.app.Color;
 import imgui.flag.ImGuiConfigFlags;
@@ -14,6 +15,9 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +41,7 @@ public class NativeWindow2 {
      * false on focus loss.
      */
     public CopyOnWriteArrayList<Consumer<Boolean>> onFocus = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Consumer<KeyEvent>> onKey = new CopyOnWriteArrayList<>();
     /**
      * TODO update when changed.
      */
@@ -148,6 +153,26 @@ public class NativeWindow2 {
         disposeWindow();
     }
 
+    public class KeyEvent{
+        public int key;
+        public int scancode;
+        /**
+         * Possible values: <br>
+         * - {@link GLFW#GLFW_PRESS} <br>
+         * - {@link GLFW#GLFW_RELEASE} <br>
+         * - {@link GLFW#GLFW_REPEAT} <br>
+         */
+        public int action;
+        public int mods;
+
+        public KeyEvent(int key, int scancode, int action, int mods) {
+            this.key = key;
+            this.scancode = scancode;
+            this.action = action;
+            this.mods = mods;
+        }
+    }
+
     /**
      * Method to create and initialize GLFW window.
      *
@@ -190,13 +215,16 @@ public class NativeWindow2 {
         clearBuffer();
         renderBuffer();
 
-        GLFW.glfwSetKeyCallback(window, new GLFWKeyCallback() {
+        glfwSetKeyCallback(window, new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
-                //TODO GLFW.GLFW_KEY
+                KeyEvent keyEvent = new KeyEvent(key, scancode, action, mods);
+                for (Consumer<KeyEvent> consumer : onKey) {
+                    consumer.accept(keyEvent);
+                }
             }
         });
-        GLFW.glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
+        glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
             @Override
             public void invoke(long window, boolean isFocus) {
                 for (Consumer<Boolean> f : onFocus) {
@@ -204,7 +232,7 @@ public class NativeWindow2 {
                 }
             }
         });
-        GLFW.glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
+        glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(final long window, final int width, final int height) {
                 try {
@@ -386,9 +414,8 @@ public class NativeWindow2 {
         return this;
     }
 
-    public NativeWindow2 focus(boolean b) {
-        if (b) glfwSetWindowAttrib(window, GLFW_FOCUSED, GLFW_TRUE);
-        else glfwSetWindowAttrib(window, GLFW_FOCUSED, GLFW_FALSE);
+    public NativeWindow2 focus() {
+        glfwFocusWindow(window);
         return this;
     }
 
@@ -402,6 +429,72 @@ public class NativeWindow2 {
             public void run() {
                 onRender.remove(this);
                 runnable.run();
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Not supported officially by GLFW, thus use {@link java.awt.event.KeyEvent} static constants instead.<br>
+     * Creates a new thread that checks every 500ms if the provided keys are pressed,
+     * and executes the code if they actually are.
+     * Note that the chances are high that a key event will be missed since we only check every 500ms,
+     * thus make it clear to your user to press and hold the desired key(s) a bit longer than normally.
+     * <pre>
+     *     onKeysPressedGlobal(new int[]{KeyEvent.VK_A}, () -> {});
+     * </pre>
+     */
+    public void onKeysPressedGlobal(int[] keys, Runnable code){
+        new Thread(() -> {
+            try{
+                while (true){
+                    boolean allPressed = true;
+                    for (int key : keys) {
+                        if(!KeyboardUtils.isPressed(key)){
+                            allPressed = false;
+                            break;
+                        }
+                    }
+                    if(allPressed)
+                        code.run();
+                    Thread.sleep(500);
+                }
+            } catch (InterruptedException e){}
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
+    /**
+     * Executes the provided code when all provided keys are pressed. <br>
+     * If you want to listen globally use {@link #onKeysPressedGlobal(int[], Runnable)}.
+     * <pre>
+     *     onKeysPressed(new int[]{GLFW_KEY_A}, () -> {});
+     * </pre>
+     */
+    public NativeWindow2 onKeysPressed(int[] keys, Runnable code){
+        if(keys == null) return this;
+        boolean[] pressed = new boolean[keys.length];
+        onKey.add(event -> {
+            for (int i = 0; i < keys.length; i++) {
+                int key = keys[i];
+                if(key == event.key){
+                    if(event.action == GLFW_PRESS)
+                        pressed[i] = true;
+                    else if(event.action == GLFW_RELEASE)
+                        pressed[i] = false;
+                    boolean allPressed = true;
+                    for (int j = 0; j < pressed.length; j++) {
+                        if(!pressed[j]){
+                            allPressed = false;
+                            break;
+                        }
+                    }
+                    if(allPressed)
+                        code.run();
+                    break;
+                }
             }
         });
         return this;
