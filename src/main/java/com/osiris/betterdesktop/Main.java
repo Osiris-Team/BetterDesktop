@@ -34,15 +34,15 @@ public class Main {
             win.onRender.add(() -> {
                 // Main
                 begin("Main Layout", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
-                        | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration
+                        //| ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration
                 );
                 setWindowPos(0, 0);
                 setWindowSize(win.width, win.height);
 
                 float panelWidth = win.width / 3;
-                new FavoritesTab(0, 0, panelWidth, win.height);
-                new RecentTab(panelWidth, 0, panelWidth, win.height);
-                new AllTab(panelWidth * 2, 0, panelWidth, win.height);
+                //new FavoritesTab(0, 0, panelWidth, win.height);
+                //new RecentTab(panelWidth, 0, panelWidth, win.height);
+                //new AllTab(panelWidth * 2, 0, panelWidth, win.height);
 
                 end();
             });
