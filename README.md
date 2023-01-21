@@ -34,7 +34,7 @@ and added to the favorites tab, thus clearing up the background.
 - `/Program Files` and `/Program Files (x86)` and `/Start Menu/Programs` 
 on all drives will be scanned for .exe and .lnk files, and then added to the all tab.
 - Limits to 1 FPS when window not focused.
-- Press and hold `CTRL + SHIFT + D` to open the window as overlay.
+- Press and hold `ALT + D` to open the window as overlay.
 - Each tab could also have a search bar below its title to search for programs by their names.
 - The titles can be smaller, as well as the gaps between the tabs, messed it up a bit there. The titles can also be removed entirely and replaced by the search fields tooltip, like "Search in favorites..." or "Search in all...".
 - The sizes for the tabs should be calculated on init and based on the screen size ( - task bar).

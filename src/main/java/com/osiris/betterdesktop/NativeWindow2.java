@@ -9,15 +9,15 @@ import imgui.app.Color;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,6 +50,8 @@ public class NativeWindow2 {
      * TODO update when changed.
      */
     public int height;
+    public NoExRunnable sleepRunnable = () -> {
+    };
     /**
      * Pointer to the native GLFW window.
      */
@@ -57,20 +59,24 @@ public class NativeWindow2 {
     /**
      * Background color of the window. Default transparent.
      */
-    protected Color colorBg = new Color(0, 0, 0, 0);
-    public NoExRunnable sleepRunnable = () -> {
-    };
+    public Color backgroundColor = new Color(0, 0, 0, 0);
     private String glslVersion = null;
+
     public NativeWindow2(String title) {
         Rectangle screen = getScreenSize();
-        init(screen.width, screen.height, title, false);
+        init(screen.width, screen.height, title, new Hints());
     }
-    public NativeWindow2(int width, int height, String title) {
-        init(width, height, title, false);
+    public NativeWindow2(String title, Hints hints) {
+        Rectangle screen = getScreenSize();
+        init(screen.width, screen.height, title, hints);
     }
 
-    public NativeWindow2(int width, int height, String title, boolean isFullScreen) {
-        init(width, height, title, isFullScreen);
+    public NativeWindow2(int width, int height, String title) {
+        init(width, height, title, new Hints());
+    }
+
+    public NativeWindow2(int width, int height, String title, Hints hints) {
+        init(width, height, title, hints);
     }
 
     /**
@@ -125,13 +131,13 @@ public class NativeWindow2 {
      *
      * @param config configuration object with basic window information
      */
-    protected void init(int width, int height, String title, boolean isFullScreen) {
+    protected void init(int width, int height, String title, Hints hints) {
         this.width = width;
         this.height = height;
         fpsLimit(60);
         AtomicBoolean isInit = new AtomicBoolean(false);
         new Thread(() -> {
-            initWindow(width, height, title, isFullScreen);
+            initWindow(width, height, title, hints);
             initImGui();
             imGuiGlfw.init(window, true);
             imGuiGl3.init(glslVersion);
@@ -153,32 +159,12 @@ public class NativeWindow2 {
         disposeWindow();
     }
 
-    public class KeyEvent{
-        public int key;
-        public int scancode;
-        /**
-         * Possible values: <br>
-         * - {@link GLFW#GLFW_PRESS} <br>
-         * - {@link GLFW#GLFW_RELEASE} <br>
-         * - {@link GLFW#GLFW_REPEAT} <br>
-         */
-        public int action;
-        public int mods;
-
-        public KeyEvent(int key, int scancode, int action, int mods) {
-            this.key = key;
-            this.scancode = scancode;
-            this.action = action;
-            this.mods = mods;
-        }
-    }
-
     /**
      * Method to create and initialize GLFW window.
      *
      * @param config configuration object with basic window information
      */
-    protected void initWindow(int width, int height, String title, boolean isFullScreen) {
+    private void initWindow(int width, int height, String title, Hints hints) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!GLFW.glfwInit()) {
@@ -187,7 +173,10 @@ public class NativeWindow2 {
 
         decideGlGlslVersions();
 
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+        hints.map.forEach((key, val) -> {
+            glfwWindowHint(key, val);
+        });
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         window = GLFW.glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
@@ -206,11 +195,7 @@ public class NativeWindow2 {
 
         GLFW.glfwSwapInterval(GLFW.GLFW_TRUE);
 
-        if (isFullScreen) {
-            GLFW.glfwMaximizeWindow(window);
-        } else {
-            GLFW.glfwShowWindow(window);
-        }
+        GLFW.glfwShowWindow(window);
 
         clearBuffer();
         renderBuffer();
@@ -314,7 +299,7 @@ public class NativeWindow2 {
      * Method used to clear the OpenGL buffer.
      */
     private void clearBuffer() {
-        GL32.glClearColor(colorBg.getRed(), colorBg.getGreen(), colorBg.getBlue(), colorBg.getAlpha());
+        GL32.glClearColor(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), backgroundColor.getAlpha());
         GL32.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
     }
 
@@ -381,8 +366,8 @@ public class NativeWindow2 {
     /**
      * @return {@link Color} instance, which represents background color for the window
      */
-    public final Color getColorBg() {
-        return colorBg;
+    public final Color getBackgroundColor() {
+        return backgroundColor;
     }
 
     public NativeWindow2 move(int x, int y) {
@@ -400,9 +385,34 @@ public class NativeWindow2 {
         return this;
     }
 
+    public NativeWindow2 minimize() {
+        glfwIconifyWindow(window);
+        return this;
+    }
+
+    /**
+     * Call after {@link #minimize()} to restore the window.
+     */
+    public NativeWindow2 restore() {
+        glfwRestoreWindow(window);
+        return this;
+    }
+
     public NativeWindow2 decorate(boolean b) {
         if (b) glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
         else glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
+        return this;
+    }
+
+    public NativeWindow2 allwaysOnTop(boolean b) {
+        if (b) glfwSetWindowAttrib(window, GLFW_FLOATING, GLFW_TRUE);
+        else glfwSetWindowAttrib(window, GLFW_FLOATING, GLFW_FALSE);
+        return this;
+    }
+
+    public NativeWindow2 focusOnShow(boolean b) {
+        if (b) glfwSetWindowAttrib(window, GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
+        else glfwSetWindowAttrib(window, GLFW_FOCUS_ON_SHOW, GLFW_FALSE);
         return this;
     }
 
@@ -423,7 +433,7 @@ public class NativeWindow2 {
      * Executes the provided code one time in the render thread/loop.
      * If you want to run it in each render add your runnable to the {@link #onRender} list.
      */
-    public NativeWindow2 access(Runnable runnable){
+    public NativeWindow2 access(Runnable runnable) {
         onRender.add(new Runnable() {
             @Override
             public void run() {
@@ -444,23 +454,23 @@ public class NativeWindow2 {
      *     onKeysPressedGlobal(new int[]{KeyEvent.VK_A}, () -> {});
      * </pre>
      */
-    public void onKeysPressedGlobal(int[] keys, Runnable code){
+    public void onKeysPressedGlobal(int[] keys, Runnable code) {
         new Thread(() -> {
-            try{
-                while (true){
+            try {
+                while (true) {
                     boolean allPressed = true;
                     for (int key : keys) {
-                        if(!KeyboardUtils.isPressed(key)){
+                        if (!KeyboardUtils.isPressed(key)) {
                             allPressed = false;
                             break;
                         }
                     }
-                    if(allPressed)
+                    if (allPressed)
                         code.run();
                     Thread.sleep(500);
                 }
-            } catch (InterruptedException e){}
-            catch (Exception e) {
+            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }).start();
@@ -473,30 +483,81 @@ public class NativeWindow2 {
      *     onKeysPressed(new int[]{GLFW_KEY_A}, () -> {});
      * </pre>
      */
-    public NativeWindow2 onKeysPressed(int[] keys, Runnable code){
-        if(keys == null) return this;
+    public NativeWindow2 onKeysPressed(int[] keys, Runnable code) {
+        if (keys == null) return this;
         boolean[] pressed = new boolean[keys.length];
         onKey.add(event -> {
             for (int i = 0; i < keys.length; i++) {
                 int key = keys[i];
-                if(key == event.key){
-                    if(event.action == GLFW_PRESS)
+                if (key == event.key) {
+                    if (event.action == GLFW_PRESS)
                         pressed[i] = true;
-                    else if(event.action == GLFW_RELEASE)
+                    else if (event.action == GLFW_RELEASE)
                         pressed[i] = false;
                     boolean allPressed = true;
                     for (int j = 0; j < pressed.length; j++) {
-                        if(!pressed[j]){
+                        if (!pressed[j]) {
                             allPressed = false;
                             break;
                         }
                     }
-                    if(allPressed)
+                    if (allPressed)
                         code.run();
                     break;
                 }
             }
         });
         return this;
+    }
+
+    public static class Hints{
+        public Map<Integer, Integer> map = new HashMap<>();
+
+        public Hints() {
+        }
+
+        public Hints maximize(boolean b) {
+            if (b) map.put(GLFW_MAXIMIZED, GLFW_TRUE);
+            else map.put(GLFW_MAXIMIZED, GLFW_FALSE);
+            return this;
+        }
+
+        public Hints decorate(boolean b) {
+            if (b) map.put(GLFW_DECORATED, GLFW_TRUE);
+            else map.put(GLFW_DECORATED, GLFW_FALSE);
+            return this;
+        }
+
+        public Hints allwaysOnTop(boolean b) {
+            if (b) map.put(GLFW_FLOATING, GLFW_TRUE);
+            else map.put(GLFW_FLOATING, GLFW_FALSE);
+            return this;
+        }
+
+        public Hints focusOnShow(boolean b) {
+            if (b) map.put(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
+            else map.put(GLFW_FOCUS_ON_SHOW, GLFW_FALSE);
+            return this;
+        }
+    }
+
+    public class KeyEvent {
+        public int key;
+        public int scancode;
+        /**
+         * Possible values: <br>
+         * - {@link GLFW#GLFW_PRESS} <br>
+         * - {@link GLFW#GLFW_RELEASE} <br>
+         * - {@link GLFW#GLFW_REPEAT} <br>
+         */
+        public int action;
+        public int mods;
+
+        public KeyEvent(int key, int scancode, int action, int mods) {
+            this.key = key;
+            this.scancode = scancode;
+            this.action = action;
+            this.mods = mods;
+        }
     }
 }

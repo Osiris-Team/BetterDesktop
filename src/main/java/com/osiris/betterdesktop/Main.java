@@ -7,9 +7,8 @@ import com.osiris.betterdesktop.views.AllTab;
 import com.osiris.betterdesktop.views.FavoritesTab;
 import com.osiris.betterdesktop.views.RecentTab;
 import com.osiris.jlib.Stream;
-import imgui.ImGui;
+import imgui.app.Color;
 import imgui.flag.ImGuiWindowFlags;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayOutputStream;
@@ -17,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static imgui.ImGui.*;
@@ -31,8 +31,9 @@ public class Main {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            NativeWindow2 win = new NativeWindow2("BetterDesktop");
-            win.decorate(false).showIcon(false);
+            NativeWindow2 win = new NativeWindow2("BetterDesktop", new NativeWindow2.Hints()
+                    .decorate(false).focusOnShow(false));
+            win.showIcon(false);
             win.onClose.add(() -> System.exit(0));
             win.onRender.add(() -> {
                 // Main
@@ -49,7 +50,38 @@ public class Main {
 
                 end();
             });
+
+            //
+            // Shortcut for opening desktop as overlay.
+            //
+            AtomicBoolean isOnTopTop = new AtomicBoolean(false);
+            AtomicBoolean isCooldown = new AtomicBoolean(false);
+            Color defBackground = win.backgroundColor;
+            win.onKeysPressedGlobal(new int[]{KeyEvent.VK_ALT, KeyEvent.VK_D}, () -> {
+                if(isCooldown.get()) return;
+                isCooldown.set(true);
+                new Thread(() -> {
+                    try{
+                        Thread.sleep(1000);
+                        isCooldown.set(false);
+                    } catch (Exception e) {}
+                }).start();
+                if(isOnTopTop.get()){
+                    isOnTopTop.set(false);
+                    win.allwaysOnTop(false);
+                    win.backgroundColor = defBackground;
+                } else{
+                    isOnTopTop.set(true);
+                    win.allwaysOnTop(true);
+                    win.backgroundColor = new Color(0, 0, 0, 0.6f);
+                }
+            });
+
+            //
+            // Set FPS limit to 1 once unfocused.
+            //
             AtomicReference<NoExRunnable> oldSleepRunnable = new AtomicReference<>();
+            oldSleepRunnable.set(win.sleepRunnable);
             win.onFocus.add((isFocus) -> {
                 if(isFocus)
                     win.sleepRunnable = oldSleepRunnable.get();
@@ -58,9 +90,7 @@ public class Main {
                     win.fpsLimit(1);
                 }
             });
-            win.onKeysPressedGlobal(new int[]{KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_D}, () -> {
-                win.focus();
-            });
+
             try {
                 // Because loading of icons needs to be done
                 // on the render thread, we remove the fps limit
