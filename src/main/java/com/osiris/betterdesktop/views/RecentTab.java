@@ -21,6 +21,20 @@ import java.util.concurrent.locks.ReentrantLock;
 import static imgui.ImGui.*;
 
 public class RecentTab {
+    private static final HashMap<String, MyFile> cache = new HashMap<>();
+    public static MyFile get(String path) {
+        synchronized (cache){
+            MyFile f = cache.get(path);
+            if(f == null){
+                File file = new File(path);
+                f = new MyFile((ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file),
+                        file);
+                cache.put(path, f);
+            }
+            return f;
+        }
+    }
+
     public static CopyOnWriteArrayList<MyFile> list = new CopyOnWriteArrayList<>();
     public static CopyOnWriteArrayList<MyFile> listToDisplay = list;
     public static Lock lock = new ReentrantLock();
@@ -41,11 +55,10 @@ public class RecentTab {
         new Thread(() -> {
             try {
                 while (true) {
-                    ConcurrentLinkedQueue<String> programs = Data.recent.recentFiles;
+                    ConcurrentLinkedQueue<String> files = Data.recent.recentFiles;
                     java.util.List<MyFile> list = new ArrayList<>();
-                    for (String program : programs) {
-                        ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(new File(program));
-                        list.add(new MyFile(icon, new File(program)));
+                    for (String path : files) {
+                        list.add(get(path));
                     }
                     lock.lock();
                     RecentTab.list.clear();
@@ -58,10 +71,11 @@ public class RecentTab {
                 throw new RuntimeException(e);
             }
 
+        //});
         }).start();
     }
 
-    public RecentTab(float x, float y, float width, float height) {
+    public static void render(float x, float y, float width, float height) {
         begin("recent", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
         setWindowPos(x, y);

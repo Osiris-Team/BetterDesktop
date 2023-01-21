@@ -190,6 +190,12 @@ public class NativeWindow2 {
         clearBuffer();
         renderBuffer();
 
+        GLFW.glfwSetKeyCallback(window, new GLFWKeyCallback() {
+            @Override
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                //TODO GLFW.GLFW_KEY
+            }
+        });
         GLFW.glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
             @Override
             public void invoke(long window, boolean isFocus) {
@@ -377,6 +383,12 @@ public class NativeWindow2 {
      */
     public NativeWindow2 showIcon(boolean b) {
         WindowUtils.hideTaskbarIcon(window);
+        return this;
+    }
+
+    public NativeWindow2 focus(boolean b) {
+        if (b) glfwSetWindowAttrib(window, GLFW_FOCUSED, GLFW_TRUE);
+        else glfwSetWindowAttrib(window, GLFW_FOCUSED, GLFW_FALSE);
         return this;
     }
 

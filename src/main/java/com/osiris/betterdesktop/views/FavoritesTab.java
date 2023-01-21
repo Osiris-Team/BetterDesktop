@@ -22,6 +22,20 @@ import java.util.concurrent.locks.ReentrantLock;
 import static imgui.ImGui.*;
 
 public class FavoritesTab {
+    private static final HashMap<String, MyFile> cache = new HashMap<>();
+    public static MyFile get(String path) {
+        synchronized (cache){
+            MyFile f = cache.get(path);
+            if(f == null){
+                File file = new File(path);
+                f = new MyFile((ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file),
+                        file);
+                cache.put(path, f);
+            }
+            return f;
+        }
+    }
+
     public static CopyOnWriteArrayList<MyFile> list = new CopyOnWriteArrayList<>();
     public static CopyOnWriteArrayList<MyFile> listToDisplay = list;
     static ImString inputValue = new ImString("", 100);
@@ -45,8 +59,7 @@ public class FavoritesTab {
                     ConcurrentHashMap<File, AtomicLong> programs = Data.favorites.programAndExecution;
                     List<Temp> finalList = new ArrayList<>();
                     programs.forEach((file, countOpened) -> {
-                        ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
-                        finalList.add(new Temp(new MyFile(icon, file), countOpened));
+                        finalList.add(new Temp(get(file.getAbsolutePath()), countOpened));
                     });
                     finalList.sort(Comparator.comparing(o -> o.countOpened.get())); // Sort ascending by count opened
                     Arr.flip(finalList);
@@ -62,11 +75,11 @@ public class FavoritesTab {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
+        //});
         }).start();
     }
 
-    public FavoritesTab(float x, float y, float width, float height) {
+    public static void render(float x, float y, float width, float height) {
         begin("favorites", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
         setWindowPos(x, y);

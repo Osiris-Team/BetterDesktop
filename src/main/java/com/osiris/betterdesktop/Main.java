@@ -29,20 +29,20 @@ public class Main {
                 e.printStackTrace();
             }
             NativeWindow2 win = new NativeWindow2("BetterDesktop");
-            win.decorate(false).showIcon(false);
+            win.decorate(false).showIcon(false).focus(false);
             win.onClose.add(() -> System.exit(0));
             win.onRender.add(() -> {
                 // Main
                 begin("Main Layout", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
-                        //| ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration
+                        | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration
                 );
                 setWindowPos(0, 0);
                 setWindowSize(win.width, win.height);
 
                 float panelWidth = win.width / 3;
-                //new FavoritesTab(0, 0, panelWidth, win.height);
-                //new RecentTab(panelWidth, 0, panelWidth, win.height);
-                //new AllTab(panelWidth * 2, 0, panelWidth, win.height);
+                FavoritesTab.render(0, 0, panelWidth, win.height);
+                RecentTab.render(panelWidth, 0, panelWidth, win.height);
+                AllTab.render(panelWidth * 2, 0, panelWidth, win.height);
 
                 end();
             });

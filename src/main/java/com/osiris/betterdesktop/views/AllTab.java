@@ -54,7 +54,7 @@ public class AllTab {
         }).start();
     }
 
-    public AllTab(float x, float y, float width, float height) {
+    public static void render(float x, float y, float width, float height) {
         begin("all", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
         setWindowPos(x, y);
