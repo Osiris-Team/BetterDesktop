@@ -1,6 +1,7 @@
 package com.osiris.betterdesktop;
 
 import com.osiris.betterdesktop.data.Data;
+import com.osiris.betterdesktop.utils.NoExRunnable;
 import com.osiris.betterdesktop.utils.UtilsNative;
 import com.osiris.betterdesktop.views.AllTab;
 import com.osiris.betterdesktop.views.FavoritesTab;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static imgui.ImGui.*;
 
@@ -43,6 +45,15 @@ public class Main {
                 new AllTab(panelWidth * 2, 0, panelWidth, win.height);
 
                 end();
+            });
+            AtomicReference<NoExRunnable> oldSleepRunnable = new AtomicReference<>();
+            win.onFocus.add((isFocus) -> {
+                if(isFocus)
+                    win.sleepRunnable = oldSleepRunnable.get();
+                else{
+                    oldSleepRunnable.set(win.sleepRunnable);
+                    win.fpsLimit(1);
+                }
             });
             try {
                 // Because loading of icons needs to be done

@@ -7,6 +7,7 @@ public class Text extends Component {
         super(parent, null);
         render = () -> {
             ImGui.text(text);
+            // TODO how to set width, height
         };
     }
 }

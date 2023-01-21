@@ -8,10 +8,7 @@ import imgui.app.Color;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import org.lwjgl.glfw.Callbacks;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
@@ -20,6 +17,7 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -34,6 +32,11 @@ public class NativeWindow2 {
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     public CopyOnWriteArrayList<Runnable> onClose = new CopyOnWriteArrayList<>();
     public CopyOnWriteArrayList<Runnable> onRender = new CopyOnWriteArrayList<>();
+    /**
+     * Executes on focus gain/loss. The passed over boolean is true on focus gain, and
+     * false on focus loss.
+     */
+    public CopyOnWriteArrayList<Consumer<Boolean>> onFocus = new CopyOnWriteArrayList<>();
     /**
      * TODO update when changed.
      */
@@ -50,7 +53,7 @@ public class NativeWindow2 {
      * Background color of the window. Default transparent.
      */
     protected Color colorBg = new Color(0, 0, 0, 0);
-    private NoExRunnable sleepRunnable = () -> {
+    public NoExRunnable sleepRunnable = () -> {
     };
     private String glslVersion = null;
     public NativeWindow2(String title) {
@@ -187,6 +190,14 @@ public class NativeWindow2 {
         clearBuffer();
         renderBuffer();
 
+        GLFW.glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
+            @Override
+            public void invoke(long window, boolean isFocus) {
+                for (Consumer<Boolean> f : onFocus) {
+                    f.accept(isFocus);
+                }
+            }
+        });
         GLFW.glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(final long window, final int width, final int height) {
