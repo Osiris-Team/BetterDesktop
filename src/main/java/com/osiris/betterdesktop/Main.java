@@ -50,10 +50,6 @@ public class Main {
                 // until there aren't any new icons being loaded, to be able
                 // to load all those icons faster.
                 win.fpsNoLimit();
-                Runnable a = () -> {
-                  text("No fps limit!");
-                };
-                win.onRender.add(a);
                 Thread.sleep(10000);
                 while(Data.isLoadingPrograms.get()) Thread.sleep(1000);
                 long oldCount = 0;
@@ -64,7 +60,6 @@ public class Main {
                     newCount = AllTab.countIconsLoaded.get();
                 }
                 win.fpsLimit(60);
-                win.onRender.remove(a);
             } catch (Exception e) {
                 e.printStackTrace();
             }
