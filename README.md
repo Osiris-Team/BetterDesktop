@@ -26,6 +26,7 @@ to remove all its data delete the whole folder (note that your original desktop 
 - Add a listener to the original desktop folder to also move files added to it later, to the favorites tab.
 - Decrease CPU and MEM usage by enhancing the all tab.
 - Add a settings popup.
+- If there are same program names add their parent path, until the names are not equal.
 
 ## Features
 - `/User/Desktop` and `/Public/Desktop` contents will be moved into the BetterDesktop program directory
