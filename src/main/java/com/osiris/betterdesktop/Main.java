@@ -97,10 +97,17 @@ public class Main {
             try {
                 File f = new File(System.getProperty("user.dir") + "/" + e.getClass().toString() + ".txt");
                 f.createNewFile();
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
                 String s = new Date() + "\n" + e.getClass() + "\n" + e.getMessage();
-                e.printStackTrace(new PrintWriter(out));
-                s += out.toString();
+                for (StackTraceElement el : e.getStackTrace()) {
+                    s += el.toString()+"\n";
+                }
+                Throwable cause = e.getCause();
+                while(cause != null){
+                    for (StackTraceElement el : cause.getStackTrace()) {
+                        s += el.toString()+"\n";
+                    }
+                    cause = cause.getCause();
+                }
                 Stream.write(s, new FileOutputStream(f));
             } catch (Exception ex) {
                 throw new RuntimeException(ex);

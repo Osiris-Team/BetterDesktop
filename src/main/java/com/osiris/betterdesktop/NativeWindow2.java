@@ -442,7 +442,9 @@ public class NativeWindow2 {
      * Relative path: icon.png <br>
      */
     public NativeWindow2 iconFromResources(String path) throws IOException, URISyntaxException {
-        return icon(UI.loadImageFromStream(NativeWindow2.class.getResourceAsStream(path)).byteBuffer);
+        return icon(UI.loadImageFromStream(NativeWindow2.class.getResourceAsStream(
+                (path.startsWith("/") ? "" : "/") +
+                path)).byteBuffer);
     }
 
     public NativeWindow2 iconFromFile(File file) throws IOException, URISyntaxException {
