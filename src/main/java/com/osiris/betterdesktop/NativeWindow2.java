@@ -5,6 +5,7 @@ import com.osiris.betterdesktop.utils.NoExRunnable;
 import com.osiris.betterdesktop.utils.jna.WindowUtils;
 import com.sun.jna.platform.KeyboardUtils;
 import imgui.ImGui;
+import imgui.ImGuiIO;
 import imgui.app.Color;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
@@ -15,7 +16,19 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
 
+import javax.imageio.ImageReader;
+import javax.swing.*;
+import javax.swing.text.html.ImageView;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -363,13 +376,6 @@ public class NativeWindow2 {
         return window;
     }
 
-    /**
-     * @return {@link Color} instance, which represents background color for the window
-     */
-    public final Color getBackgroundColor() {
-        return backgroundColor;
-    }
-
     public NativeWindow2 move(int x, int y) {
         glfwSetWindowPos(window, x, y);
         return this;
@@ -426,6 +432,33 @@ public class NativeWindow2 {
 
     public NativeWindow2 focus() {
         glfwFocusWindow(window);
+        return this;
+    }
+
+    /**
+     * Loads the image from the provided relative path (resources folder),
+     * and sets it as this windows' icon. Example:<br>
+     * Absolute path: C:/User/MyProject/src/resources/icon.png <br>
+     * Relative path: icon.png <br>
+     */
+    public NativeWindow2 iconFromResources(String path) throws IOException, URISyntaxException {
+        return icon(UI.loadImageFromStream(NativeWindow2.class.getResourceAsStream(path)).byteBuffer);
+    }
+
+    public NativeWindow2 iconFromFile(File file) throws IOException, URISyntaxException {
+        return icon(UI.loadImageFromFile(file).byteBuffer);
+    }
+
+    public NativeWindow2 icon(ByteBuffer buf) {
+        GLFWImage glfwImage= GLFWImage.malloc();
+        glfwImage.set(512, 512, buf);
+        GLFWImage.Buffer images = GLFWImage.malloc(1);
+        images.put(0, glfwImage);
+
+        glfwSetWindowIcon(window, images);
+
+        images.free();
+        glfwImage.free();
         return this;
     }
 
@@ -512,9 +545,6 @@ public class NativeWindow2 {
 
     public static class Hints{
         public Map<Integer, Integer> map = new HashMap<>();
-
-        public Hints() {
-        }
 
         public Hints maximize(boolean b) {
             if (b) map.put(GLFW_MAXIMIZED, GLFW_TRUE);

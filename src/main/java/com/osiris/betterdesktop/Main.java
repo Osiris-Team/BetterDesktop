@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,7 +34,13 @@ public class Main {
             }
             NativeWindow2 win = new NativeWindow2("BetterDesktop", new NativeWindow2.Hints()
                     .decorate(false).focusOnShow(false));
-            win.showIcon(false);
+            try{
+                win.iconFromResources("icon.png");
+            } catch (Exception e) {
+                win.iconFromFile(new File(System.getProperty("user.dir")+
+                        "/src/main/resources/icon.png"));
+            }
+            win.backgroundColor = new Color(0, 0, 0, 0.6f);
             win.onClose.add(() -> System.exit(0));
             win.onRender.add(() -> {
                 // Main
@@ -51,31 +58,6 @@ public class Main {
                 end();
             });
 
-            //
-            // Shortcut for opening desktop as overlay.
-            //
-            AtomicBoolean isOnTopTop = new AtomicBoolean(false);
-            AtomicBoolean isCooldown = new AtomicBoolean(false);
-            Color defBackground = win.backgroundColor;
-            win.onKeysPressedGlobal(new int[]{KeyEvent.VK_ALT, KeyEvent.VK_D}, () -> {
-                if(isCooldown.get()) return;
-                isCooldown.set(true);
-                new Thread(() -> {
-                    try{
-                        Thread.sleep(1000);
-                        isCooldown.set(false);
-                    } catch (Exception e) {}
-                }).start();
-                if(isOnTopTop.get()){
-                    isOnTopTop.set(false);
-                    win.allwaysOnTop(false);
-                    win.backgroundColor = defBackground;
-                } else{
-                    isOnTopTop.set(true);
-                    win.allwaysOnTop(true);
-                    win.backgroundColor = new Color(0, 0, 0, 0.6f);
-                }
-            });
 
             //
             // Set FPS limit to 1 once unfocused.
@@ -111,6 +93,7 @@ public class Main {
                 e.printStackTrace();
             }
         } catch (Exception e) {
+            e.printStackTrace();
             try {
                 File f = new File(System.getProperty("user.dir") + "/" + e.getClass().toString() + ".txt");
                 f.createNewFile();
