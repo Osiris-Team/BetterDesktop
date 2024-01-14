@@ -37,8 +37,13 @@ public class Main {
             try{
                 win.iconFromResources("icon.png");
             } catch (Exception e) {
-                win.iconFromFile(new File(System.getProperty("user.dir")+
+                try{
+                    win.iconFromFile(new File(System.getProperty("user.dir")+
                         "/src/main/resources/icon.png"));
+                } catch (Exception ex) {
+                    e.printStackTrace();
+                    ex.printStackTrace();
+                }
             }
             win.backgroundColor = new Color(0, 0, 0, 0.6f);
             win.onClose.add(() -> System.exit(0));

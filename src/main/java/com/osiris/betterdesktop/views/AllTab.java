@@ -13,6 +13,8 @@ import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static imgui.ImGui.*;
@@ -41,8 +43,7 @@ public class AllTab {
                 HashSet<File> programs = Data.all().programs;
                 List<MyFile> finalList = new ArrayList<>();
                 for (File program : programs) {
-                    ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(program);
-                    finalList.add(new MyFile(icon, program));
+                    finalList.add(new MyFile(program));
                     countIconsLoaded.incrementAndGet();
                 }
                 finalList.sort(Comparator.comparing(o -> o.name)); // Sort alphabetically by name

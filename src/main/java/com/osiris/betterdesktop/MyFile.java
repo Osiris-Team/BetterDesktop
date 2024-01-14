@@ -5,10 +5,13 @@ import com.osiris.betterdesktop.utils.AsyncTerminal;
 import mslinks.ShellLink;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static imgui.ImGui.openPopup;
@@ -66,8 +69,12 @@ public class MyFile {
      */
     public float similariy = 0;
 
-    public MyFile(ImageIcon icon, File file) {
-        this.icon = icon;
+    public static ExecutorService executor = Executors.newCachedThreadPool();
+
+    public MyFile(File file) {
+        executor.execute(() ->{
+            this.icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
+        });
         this.file = file;
         this.name = file.getName().replace(".lnk", "")
                 .replace(".exe", "");

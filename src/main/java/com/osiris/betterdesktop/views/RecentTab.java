@@ -27,8 +27,7 @@ public class RecentTab {
             MyFile f = cache.get(path);
             if(f == null){
                 File file = new File(path);
-                f = new MyFile((ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file),
-                        file);
+                f = new MyFile(file);
                 cache.put(path, f);
             }
             return f;
