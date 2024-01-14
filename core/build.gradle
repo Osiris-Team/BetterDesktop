@@ -1,0 +1,22 @@
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
+
+dependencies {
+  api "com.github.Osiris-Team:Desku:$deskuVersion"
+  api "com.github.Osiris-Team:jlib:16.14"
+  api "com.github.vatbub:mslinks:1.0.6.2"
+}
+
+// Ensure that everything other than classes/.java files are also included in the final jar
+// This should also be included in your project if you want to easily load resources.
+sourceSets {
+  main {
+    resources {
+      srcDirs = ["src/main/java", "src/main/resources"]
+      include '**/*' // Include everything (no .java by default)
+    }
+
+  }
+}
+// This must also be included if you want to generate the sources jar without issues
+tasks.withType(Jar).configureEach { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
