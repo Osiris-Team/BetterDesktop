@@ -32,6 +32,11 @@ to remove all its data delete the whole folder (note that your original desktop 
 - Add a settings popup.
 - If there are same program names add their parent path, until the names are not equal.
 
+## Ideas
+- Make this a web browser too by adding a search field and using the webview
+- Add support for PWAs and also allow storing urls (maybe as shortcuts) and opening them in a fullscreen webview
+- Replace JavaScript with Java by integrating a custom Java browser and using that instead of regular search
+
 ## Features
 - `/User/Desktop` and `/Public/Desktop` contents will be moved into the BetterDesktop program directory
 and added to the favorites tab, thus clearing up the background.

@@ -8,7 +8,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.osiris.desku.App;
-import com.author.core.Main;
+import com.author.shared.Main;
 
 /** Launches the Android application. */
 public class AndroidLauncher extends Activity {
@@ -30,7 +30,7 @@ public class AndroidLauncher extends Activity {
         mainHandler = new Handler(Looper.getMainLooper());
 
 
-        App.init(new AndroidUIManager());
+        App.uis = new AndroidUIManager();
         new Thread(() -> {
             Main.main(new String[]{});
         }).start();

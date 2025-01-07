@@ -19,7 +19,7 @@ eclipse.project {
 dependencies {
   implementation "com.mobidevelop.robovm:robovm-cocoatouch:$robovmVersion"
   implementation "com.mobidevelop.robovm:robovm-rt:$robovmVersion"
-  implementation project(':core')
+  implementation project(':shared')
 }
 
 robovm {

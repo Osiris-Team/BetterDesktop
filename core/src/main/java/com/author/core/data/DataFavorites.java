@@ -1,4 +1,4 @@
-package com.author.core.data;
+package com.author.shared.data;
 
 import com.osiris.jlib.json.JsonFile;
 

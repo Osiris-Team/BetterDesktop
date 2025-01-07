@@ -1,6 +1,6 @@
 package com.osiris.betterdesktop.utils;
 
-import com.author.core.utils.UtilsNative;
+import com.author.shared.utils.UtilsNative;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

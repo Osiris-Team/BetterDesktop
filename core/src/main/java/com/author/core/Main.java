@@ -1,9 +1,9 @@
-package com.author.core;
+package com.author.shared;
 
-import com.author.core.home.Home;
-import com.author.core.data.Data;
-import com.author.core.utils.UtilsNative;
-import com.author.core.views.AllTab;
+import com.author.shared.home.Home;
+import com.author.shared.data.Data;
+import com.author.shared.utils.UtilsNative;
+import com.author.shared.views.AllTab;
 import com.osiris.desku.App;
 import com.osiris.desku.ui.UI;
 import com.osiris.jlib.Stream;

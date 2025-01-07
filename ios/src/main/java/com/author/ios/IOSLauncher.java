@@ -1,6 +1,6 @@
 package com.author.ios;
 
-import com.author.core.Main;
+import com.author.shared.Main;
 import com.osiris.desku.App;
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.uikit.*;
@@ -18,7 +18,7 @@ public class IOSLauncher extends UIApplicationDelegateAdapter {
         rootViewController.setView(webView);
         window.setRootViewController(rootViewController);
 
-        App.init(new IOSUIManager());
+        App.uis = new IOSUIManager();
         Main.main(new String[]{});
 
         // Make the window visible

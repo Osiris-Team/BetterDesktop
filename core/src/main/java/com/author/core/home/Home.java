@@ -1,8 +1,8 @@
-package com.author.core.home;
+package com.author.shared.home;
 
-import com.author.core.views.AllTab;
-import com.author.core.views.FavoritesTab;
-import com.author.core.views.RecentTab;
+import com.author.shared.views.AllTab;
+import com.author.shared.views.FavoritesTab;
+import com.author.shared.views.RecentTab;
 import com.osiris.desku.App;
 import com.osiris.desku.Route;
 import com.osiris.desku.ui.Component;

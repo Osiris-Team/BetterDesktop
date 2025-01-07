@@ -1,8 +1,8 @@
-package com.author.core.views;
+package com.author.shared.views;
 
 
-import com.author.core.data.Data;
-import com.author.core.utils.Arr;
+import com.author.shared.data.Data;
+import com.author.shared.utils.Arr;
 import com.osiris.betterdesktop.MyFile;
 import com.osiris.desku.ui.display.Text;
 import com.osiris.desku.ui.layout.Vertical;

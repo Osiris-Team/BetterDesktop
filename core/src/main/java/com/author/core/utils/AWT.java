@@ -1,4 +1,4 @@
-package com.author.core.utils;
+package com.author.shared.utils;
 
 import javax.swing.*;
 import java.awt.*;

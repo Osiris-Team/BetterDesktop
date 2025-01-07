@@ -1,8 +1,8 @@
 package com.osiris.betterdesktop;
 
-import com.author.core.data.Data;
-import com.author.core.utils.AWT;
-import com.author.core.utils.AsyncTerminal;
+import com.author.shared.data.Data;
+import com.author.shared.utils.AWT;
+import com.author.shared.utils.AsyncTerminal;
 import com.osiris.desku.ui.Component;
 import com.osiris.desku.ui.display.Text;
 import mslinks.ShellLink;
